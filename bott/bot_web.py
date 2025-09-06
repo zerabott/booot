@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Web Service Wrapper for Telegram Bot on Render
-Runs bot.py in a background thread and exposes health check endpoints
+Runs bot.py in a background subprocess and exposes health check endpoints
 """
 
 from flask import Flask, jsonify
@@ -60,15 +60,15 @@ def ping():
 
 # ------------------- Start Bot -------------------
 def run_bot():
-    """Start bot.py as a subprocess"""
+    """Start bot.py as a non-blocking subprocess"""
     try:
         logger.info("🚀 Starting Telegram bot subprocess...")
         bot_status["start_time"] = datetime.utcnow()
         bot_status["running"] = True
 
-        # Run bot.py in the same environment
-        subprocess.run([sys.executable, "bot.py"])
-        
+        # Start bot.py without blocking the main thread
+        subprocess.Popen([sys.executable, "bot.py"])
+
     except Exception as e:
         logger.error(f"❌ Bot subprocess error: {e}")
         bot_status["running"] = False
@@ -81,3 +81,6 @@ if __name__ == "__main__":
     bot_thread.start()
 
     # Start Flask server immediately so Render detects the open port
+    port = int(os.environ.get("PORT", 5000))
+    logger.info(f"🌐 Starting web server on 0.0.0.0:{port}")
+    app.run(host="0.0.0.0", port=port, debug=False, use_reloader=False)
