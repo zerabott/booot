@@ -1,0 +1,28 @@
+# Core Bot Dependencies
+python-telegram-bot>=20.0
+flask>=2.3.0
+
+# Environment and Configuration
+# python-dotenv removed - Replit provides environment variables natively
+pytz>=2023.3
+
+# Database and Caching (optional - using SQLite built-in)
+# redis>=4.5.0  # Optional - fallback to in-memory rate limiting
+
+# Content Processing
+nltk>=3.8
+textblob>=0.17.1
+profanity-check>=1.0.3
+langdetect>=1.0.9
+
+# Analytics and Monitoring (lightweight for Replit)
+numpy>=1.24.0
+psutil>=5.9.0
+
+# Security and Validation
+validators>=0.20.0
+
+# Utilities
+requests>=2.31.0
+aiohttp>=3.8.0
+schedule>=1.2.0

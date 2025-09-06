@@ -1,0 +1,12 @@
+# Essential packages for production deployment
+python-telegram-bot>=20.0
+flask>=2.3.0
+python-dotenv>=1.0.0
+schedule>=1.2.0
+pandas>=1.5.0
+psutil>=5.9.0
+nltk>=3.8
+textblob>=0.17.1
+profanity-check>=1.0.3
+langdetect>=1.0.9
+requests>=2.31.0

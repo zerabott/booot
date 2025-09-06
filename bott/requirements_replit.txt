@@ -1,0 +1,28 @@
+# Core Bot Dependencies for Replit
+python-telegram-bot>=20.0
+flask>=2.3.0
+
+# Environment and Configuration
+pytz>=2023.3
+
+# Database and Storage
+# Note: Using SQLite (built-in) instead of Redis for simplicity in Replit
+
+# Content Processing (lightweight versions)
+nltk>=3.8
+textblob>=0.17.1
+profanity-check>=1.0.3
+langdetect>=1.0.9
+
+# Basic Analytics
+numpy>=1.24.0
+
+# Security and Validation
+cryptography>=41.0.0
+validators>=0.20.0
+
+# Utilities
+requests>=2.31.0
+aiohttp>=3.8.0
+aiofiles>=23.0.0
+schedule>=1.2.0
