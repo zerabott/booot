@@ -1,17 +1,15 @@
 #!/usr/bin/env python3
 """
 Web Service Wrapper for Telegram Bot on Render
-Runs the bot with proper logging, environment checks, and webhook integration
+Runs the bot and exposes health check endpoints
 """
 
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify
 import os
 import sys
 import logging
 from datetime import datetime
-from telegram import Bot, Update
-from telegram.ext import Dispatcher
-from bot import dp  # Import your Dispatcher from bot.py
+import subprocess
 
 # ------------------- Logging -------------------
 logging.basicConfig(
@@ -28,12 +26,8 @@ if missing_vars:
     logger.error(f"❌ Missing environment variables: {missing_vars}")
     sys.exit(1)
 
-TOKEN = os.getenv("BOT_TOKEN")
-bot = Bot(TOKEN)
-dispatcher = dp  # your Dispatcher from bot.py
-
 # ------------------- Bot Status -------------------
-bot_status = {"running": True, "start_time": datetime.utcnow(), "last_activity": None}
+bot_status = {"running": False, "start_time": None, "last_activity": None}
 
 # ------------------- Flask App -------------------
 app = Flask(__name__)
@@ -46,7 +40,7 @@ def home():
         "service": "Telegram Confession Bot",
         "timestamp": datetime.utcnow().isoformat(),
         "bot_running": bot_status["running"],
-        "uptime": (datetime.utcnow() - bot_status["start_time"]).total_seconds()
+        "uptime": (datetime.utcnow() - bot_status["start_time"]).total_seconds() if bot_status["start_time"] else 0
     })
 
 @app.route("/health", methods=["GET"])
@@ -63,22 +57,27 @@ def ping():
     """Simple ping endpoint"""
     return "pong"
 
-@app.route(f"/{TOKEN}", methods=["POST"])
-def webhook():
-    """Telegram webhook endpoint"""
+# ------------------- Start Bot -------------------
+def run_bot():
+    """Start the bot.py script as a subprocess"""
     try:
-        update = Update.de_json(request.get_json(force=True), bot)
-        dispatcher.process_update(update)
-        bot_status["last_activity"] = datetime.utcnow()
-        return "ok"
-    except Exception as e:
-        logger.error(f"❌ Error processing update: {e}")
-        return "error", 500
+        logger.info("🚀 Starting Telegram bot subprocess...")
+        bot_status["start_time"] = datetime.utcnow()
+        bot_status["running"] = True
 
-# ------------------- Start Flask -------------------
+        # Run bot.py as a separate process
+        subprocess.run([sys.executable, "bot.py"])
+        
+    except Exception as e:
+        logger.error(f"❌ Bot subprocess error: {e}")
+        bot_status["running"] = False
+        raise
+
 if __name__ == "__main__":
+    # Start the bot in a subprocess
+    run_bot()
+
+    # Run Flask web server on Render port
     port = int(os.environ.get("PORT", 5000))
-    logger.info(f"🚀 Starting Telegram Confession Bot Web Service on 0.0.0.0:{port}")
-    logger.info(f"⏰ Start time: {bot_status['start_time'].strftime('%Y-%m-%d %H:%M:%S UTC')}")
-    logger.info("=" * 50)
+    logger.info(f"🌐 Starting web server on 0.0.0.0:{port}")
     app.run(host="0.0.0.0", port=port, debug=False, use_reloader=False)
